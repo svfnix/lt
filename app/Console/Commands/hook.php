@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Telegram\Bot\Api;
 
 class hook extends Command
 {
