@@ -11,4 +11,8 @@
 |
 */
 
+Route::get('/', function(){
+    return time();
+})->name('home');
+
 Route::post('/bot/webhook', 'telegram@handle')->name('telegram_handle');
