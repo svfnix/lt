@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function(){
-    return time();
+    return 'it is ' . time();
 })->name('home');
 
 Route::post('/bot/webhook', 'telegram@handle')->name('telegram_handle');
