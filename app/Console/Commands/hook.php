@@ -14,7 +14,7 @@ class hook extends Command
     {
         $telegram = new Api();
         $response = $telegram->setWebhook([
-            'url' => 'http://' . env('DOMAIN') . '/bot/webhook',
+            'url' => 'https://' . env('DOMAIN') . '/bot/webhook',
             'certificate' => 'storage/certificates/ssl.pem'
         ]);
 
