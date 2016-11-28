@@ -78,96 +78,94 @@ class telegram extends Controller
         $msg_reject = 'انصراف و حذف پیام';
 
         $this->telegram = new Api();
-        $responses = $this->telegram->getUpdates();
-        foreach ($responses as $response){
+        $response = $this->telegram->getWebhookUpdates();
 
-            $this->msg($response);
+        $this->msg($response);
 
-            $message = $response->getMessage();
-            if($message->has('photo')){
+        $message = $response->getMessage();
+        if($message->has('photo')){
 
-                $photo = $message->getPhoto();
-                $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
+            $photo = $message->getPhoto();
+            $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
-                $this->msg('Please send caption:');
-                $this->setState('STATE_SEND_CAPTION');
+            $this->msg('Please send caption:');
+            $this->setState('STATE_SEND_CAPTION');
 
-            } elseif($message->has('video')) {
+        } elseif($message->has('video')) {
 
-                $this->saveRequest('video', $message->getVideo()->getFileId());
+            $this->saveRequest('video', $message->getVideo()->getFileId());
 
-                $this->msg('Please send caption:');
-                $this->setState('STATE_SEND_CAPTION');
+            $this->msg('Please send caption:');
+            $this->setState('STATE_SEND_CAPTION');
 
-            } else {
+        } else {
 
-                $this->loadRequest();
+            $this->loadRequest();
 
-                switch ($this->getState()){
+            switch ($this->getState()){
 
-                    case 'STATE_SEND_CAPTION':
-                        $keyboard = [
-                            [$msg_accept],
-                            [$msg_edit],
-                            [$msg_reject]
-                        ];
+                case 'STATE_SEND_CAPTION':
+                    $keyboard = [
+                        [$msg_accept],
+                        [$msg_edit],
+                        [$msg_reject]
+                    ];
 
-                        $reply_markup = $this->telegram->replyKeyboardMarkup([
-                            'keyboard' => $keyboard,
-                            'resize_keyboard' => true,
-                            'one_time_keyboard' => true
-                        ]);
+                    $reply_markup = $this->telegram->replyKeyboardMarkup([
+                        'keyboard' => $keyboard,
+                        'resize_keyboard' => true,
+                        'one_time_keyboard' => true
+                    ]);
 
-                        $caption = $this->generateCaption($message);
-                        $this->setCaption($caption);
+                    $caption = $this->generateCaption($message);
+                    $this->setCaption($caption);
 
-                        $func = 'send' . ucfirst($this->type);
-                        $this->telegram->$func([
-                            'chat_id' => $this->chatid,
-                            $this->type => $this->file,
-                            'caption' => $caption,
-                            'reply_markup' => $reply_markup
-                        ]);
+                    $func = 'send' . ucfirst($this->type);
+                    $this->telegram->$func([
+                        'chat_id' => $this->chatid,
+                        $this->type => $this->file,
+                        'caption' => $caption,
+                        'reply_markup' => $reply_markup
+                    ]);
 
-                        $this->msg('Are you sure want to send this message to channel?');
-                        $this->setState('STATE_GET_CONFIRM');
-                        break;
+                    $this->msg('Are you sure want to send this message to channel?');
+                    $this->setState('STATE_GET_CONFIRM');
+                    break;
 
-                    case 'STATE_GET_CONFIRM':
+                case 'STATE_GET_CONFIRM':
 
-                        $text = $message->has('text') ? $message->getText() : '';
+                    $text = $message->has('text') ? $message->getText() : '';
 
-                        switch ($text){
-                            case $msg_accept:
+                    switch ($text){
+                        case $msg_accept:
 
-                                $func = 'send' . ucfirst($this->type);
-                                $this->telegram->$func([
-                                    'chat_id' => $this->chatid,
-                                    $this->type => $this->file,
-                                    'caption' => $caption
-                                ]);
+                            $func = 'send' . ucfirst($this->type);
+                            $this->telegram->$func([
+                                'chat_id' => $this->chatid,
+                                $this->type => $this->file,
+                                'caption' => $caption
+                            ]);
 
-                                $this->msg('Message sent successfully.');
-                                $this->clear();
+                            $this->msg('Message sent successfully.');
+                            $this->clear();
 
-                                break;
+                            break;
 
-                            case $msg_edit:
+                        case $msg_edit:
 
-                                $this->setState('STATE_SEND_CAPTION');
-                                $this->msg('Please send caption:');
+                            $this->setState('STATE_SEND_CAPTION');
+                            $this->msg('Please send caption:');
 
-                                break;
+                            break;
 
-                            case $msg_reject:
+                        case $msg_reject:
 
-                                $this->clear();
-                                $this->msg('Message rejected!');
+                            $this->clear();
+                            $this->msg('Message rejected!');
 
-                                break;
-                        }
-                        break;
-                }
+                            break;
+                    }
+                    break;
             }
         }
     }
