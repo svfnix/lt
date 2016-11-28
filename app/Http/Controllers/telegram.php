@@ -31,14 +31,7 @@ class telegram extends Controller
         $telegram = new Api();
         $response = $telegram->getWebhookUpdates();
 
-        /**
-         * @var Update $msg
-         */
-        $msg = array_pop($response);
-
-
-
-        $message = $msg->getMessage();
+        $message = $response->getMessage();
         $telegram->sendMessage([
             'chat_id' => $CHAT_ID,
             'text' => print_r($message, 1)
