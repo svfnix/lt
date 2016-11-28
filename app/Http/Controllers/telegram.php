@@ -164,6 +164,10 @@ class telegram extends Controller
                             break;
                     }
                     break;
+
+                default:
+                    $this->msg($message->getText());
+                    break;
             }
         }
     }
