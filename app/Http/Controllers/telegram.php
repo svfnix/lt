@@ -35,7 +35,7 @@ class telegram extends Controller
             'text' => print_r($response, 1)
         ]);
 
-        return true;
+        return 'ok';
 
         /**
          * @var Update $msg
@@ -47,20 +47,8 @@ class telegram extends Controller
             $type = 'photo';
         } else {
             $type = $msg->getMessage()->getDocument()->getMimeType();
-            if($type == 'video/mp4'){
-                $type = 'video';
-            } else {
-                $type = $msg->getMessage()->getVoice();
-                if($type){
-                    $type = 'voice';
-                } else {
-                    $type = $msg->getMessage()->getDocument();
-                    if($type){
-                        $type = 'document';
-                    } else {
-                        $type = 'text';
-                    }
-                }
+            switch ($type){
+                case 'video/mp4': $type = 'video'; break;
             }
         }
 
