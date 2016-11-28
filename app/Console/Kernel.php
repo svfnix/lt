@@ -15,8 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\hook::class,
         Commands\hookoff::class,
-        Commands\debug::class,
-        Commands\test::class
+        Commands\debug::class
     ];
 
     /**
