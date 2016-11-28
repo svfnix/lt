@@ -82,7 +82,7 @@ class telegram extends Controller
         $message = $response->getMessage();
         file_put_contents('msg', print_r($message, 1));die();
 
-        $this->msg($message);
+        $this->msg($message->getText());
         die();
 
         if($message->has('photo')){
