@@ -39,21 +39,20 @@ class telegram extends Controller
          */
         $msg = array_pop($response);
 
-        $photo = $msg->getMessage()->getPhoto();
-        if($photo){
+        $type = $msg->getMessage()->getPhoto();
+        if($type){
             $type = 'photo';
         } else {
-
-            $video = $msg->getMessage()->getVideo();
-            if($video){
+            $type = $msg->getMessage()->getDocument()->getMimeType();
+            if($type == 'video/mp4'){
                 $type = 'video';
             } else {
-                $voice = $msg->getMessage()->getVoice();
-                if($voice){
+                $type = $msg->getMessage()->getVoice();
+                if($type){
                     $type = 'voice';
                 } else {
-                    $document = $msg->getMessage()->getDocument();
-                    if($document){
+                    $type = $msg->getMessage()->getDocument();
+                    if($type){
                         $type = 'document';
                     } else {
                         $type = 'text';
