@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Telegram\Bot\Api;
-use Telegram\Bot\Objects\Update;
 
 class telegram extends Controller
 {
