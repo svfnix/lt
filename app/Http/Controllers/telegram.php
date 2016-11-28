@@ -30,10 +30,10 @@ class telegram extends Controller
 
         $telegram = new Api();
         $response = $telegram->getWebhookUpdates();
-        $telegram->sendMessage([
+/*        $telegram->sendMessage([
             'chat_id' => $CHAT_ID,
             'text' => print_r($response, 1)
-        ]);
+        ]);*/
 
         return 'ok';
 
