@@ -9,174 +9,166 @@ use Telegram\Bot\Objects\Update;
 
 class telegram extends Controller
 {
+    private $telegram;
+    private $type;
+    private $file;
 
-    function file_url($file){
+    private $chatid;
+    private $channel;
+
+    function clear(){
+        cache(['state' => null], Carbon::now()->addSecond());
+        cache(['type' => null], Carbon::now()->addSecond());
+        cache(['file' => null], Carbon::now()->addSecond());
+        cache(['caption' => null], Carbon::now()->addSecond());
+    }
+
+    function setState($state){
+        cache(['state' => $state], Carbon::now()->addYears(1));
+    }
+
+    function getState(){
+        return cache('state', null);
+    }
+
+    function saveRequest($type, $file){
+        cache(['type' => $type], Carbon::now()->addYears(1));
+        cache(['file' => $file], Carbon::now()->addYears(1));
+    }
+
+    function loadRequest(){
+        $this->type = cache('type');
+        $this->file = cache('file');
+    }
+
+    function setCaption($caption){
+        cache(['state' => $caption], Carbon::now()->addYears(1));
+    }
+
+    function getCaption(){
+        return cache('caption', null);
+    }
+
+    function msg($message){
+        if(is_array($message)){
+            $message = print_r($message);
+        }
+        $this->telegram->sendMessage([
+            'chat_id' => $this->chatid,
+            'text' => print_r($message)
+        ]);
+    }
+
+    function getFileUrl($file){
         return 'https://api.telegram.org/file/bot'.config('telegram.bot_token').'/'.$file;
     }
 
-    function addSignature($message){
-        return "{$message}\n\n💟 @telegfa";
+    function generateCaption($message){
+        $text = $message->has('text') ? $message->getText() : '';
+        return implode("\n\n", [$text, '💟 @telegfa']);
     }
 
     public function handle()
     {
-        $CHAT_ID = env('TELEGRAM_CHAT_ID');
-        $CHANNEL = env('TELEGRAM_CHANNEL');
+        $this->chatid = env('TELEGRAM_CHAT_ID');
+        $this->channel = env('TELEGRAM_CHANNEL');
 
         $msg_accept = 'بله ارسال کن';
         $msg_edit = 'ویرایش پیام';
         $msg_reject = 'انصراف و حذف پیام';
 
+        $this->telegram = new Api();
+        $responses = $this->telegram->getUpdates();
+        foreach ($responses as $response){
 
-        $telegram = new Api();
-        $response = $telegram->getWebhookUpdates();
+            $this->msg($response);
 
-        $message = $response->getMessage();
-        $telegram->sendMessage([
-            'chat_id' => $CHAT_ID,
-            'text' => $message->has('document')
-        ]);
-        die('ok');
+            $message = $response->getMessage();
+            if($message->has('photo')){
 
-        if($type){
-            
-            $type = 'photo';
-            
-            $photo = (array)$msg->getMessage()->getPhoto();
-            $photo = array_pop($photo);
-            $photo = array_pop($photo);
-            $file = $telegram->getFile(['file_id' => $photo['file_id']])->getFilePath();
-            
-        } else {
-            
-            $type = $msg->getMessage()->getDocument()->getMimeType();
-            switch ($type){
-                case 'video/mp4':
-                    $type = 'video';
-                    $file = $telegram->getFile(['file_id' => $msg->getMessage()->getDocument()->getFileId()])->getFilePath();
-                    break;
-            }
-        }
+                $photo = $message->getPhoto();
+                $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
-        switch ($type){
-            case 'photo':
-            case 'video':
-            case 'voice':
-            case 'document':
-                
-                $file = $this->file_url($file);
+                $this->msg('Please send caption:');
+                $this->setState('STATE_SEND_CAPTION');
 
-                cache(['state' => 'STATE_SEND_CAPTION'], Carbon::now()->addMinutes(10));
-                cache(['type' => $type], Carbon::now()->addMinutes(10));
-                cache(['file' => $file], Carbon::now()->addMinutes(10));
+            } elseif($message->has('video')) {
 
-                $telegram->sendMessage([
-                    'chat_id' => $CHAT_ID,
-                    'text' => 'Please send caption:'
-                ]);
+                $this->saveRequest('video', $message->getVideo()->getFileId());
 
-                break;
+                $this->msg('Please send caption:');
+                $this->setState('STATE_SEND_CAPTION');
 
-            default:
+            } else {
 
-                switch (Cache::get('state')){
+                $this->loadRequest();
+
+                switch ($this->getState()){
+
                     case 'STATE_SEND_CAPTION':
-
                         $keyboard = [
                             [$msg_accept],
                             [$msg_edit],
                             [$msg_reject]
                         ];
 
-                        $reply_markup = $telegram->replyKeyboardMarkup([
+                        $reply_markup = $this->telegram->replyKeyboardMarkup([
                             'keyboard' => $keyboard,
                             'resize_keyboard' => true,
                             'one_time_keyboard' => true
                         ]);
 
-                        $caption = $msg->getMessage()->getText();
-                        $caption = $this->addSignature($caption);
-                        cache(['caption' => $caption], Carbon::now()->addMinutes(10));
+                        $caption = $this->generateCaption($message);
+                        $this->setCaption($caption);
 
-                        $type = Cache::get('type');
-                        $func = 'send' . ucfirst($type);
-
-                        $telegram->$func([
-                            'chat_id' => $CHAT_ID,
-                            $type => cache('file'),
+                        $func = 'send' . ucfirst($this->type);
+                        $this->telegram->$func([
+                            'chat_id' => $this->chatid,
+                            $this->type => $this->file,
                             'caption' => $caption,
                             'reply_markup' => $reply_markup
                         ]);
 
-                        $telegram->sendMessage([
-                            'chat_id' => $CHAT_ID,
-                            'text' => 'Are you sure want to send this message to channel?'
-                        ]);
-
-                        cache(['state' => 'STATE_GET_CONFIRM'], Carbon::now()->addMinutes(10));
-
+                        $this->msg('Are you sure want to send this message to channel?');
+                        $this->setState('STATE_GET_CONFIRM');
                         break;
 
-
                     case 'STATE_GET_CONFIRM':
-                        $choose = $msg->getMessage()->getText();
 
-                        switch ($choose){
+                        $text = $message->has('text') ? $message->getText() : '';
+
+                        switch ($text){
                             case $msg_accept:
 
-                                $type = cache('type');
-                                $func = 'send' . ucfirst($type);
-
-                                $telegram->$func([
-                                    'chat_id' => $CHAT_ID,
-                                    $type => cache('file'),
-                                    'caption' =>  cache('caption')
+                                $func = 'send' . ucfirst($this->type);
+                                $this->telegram->$func([
+                                    'chat_id' => $this->chatid,
+                                    $this->type => $this->file,
+                                    'caption' => $caption
                                 ]);
 
-                                $telegram->sendMessage([
-                                    'chat_id' => $CHAT_ID,
-                                    'text' => 'Message sent successfully.'
-                                ]);
-
-                                cache(['state' => null], Carbon::now()->addSecond());
-                                cache(['type' => null], Carbon::now()->addSecond());
-                                cache(['file' => null], Carbon::now()->addSecond());
-                                cache(['caption' => null], Carbon::now()->addSecond());
+                                $this->msg('Message sent successfully.');
+                                $this->clear();
 
                                 break;
 
                             case $msg_edit:
 
-                                cache(['state' => 'STATE_SEND_CAPTION'], Carbon::now()->addMinutes(10));
-                                $telegram->sendMessage([
-                                    'chat_id' => $CHAT_ID,
-                                    'text' => 'Please send caption:'
-                                ]);
+                                $this->setState('STATE_SEND_CAPTION');
+                                $this->msg('Please send caption:');
 
                                 break;
 
                             case $msg_reject:
 
-                                cache(['state' => null], Carbon::now()->addSecond());
-                                cache(['type' => null], Carbon::now()->addSecond());
-                                cache(['file' => null], Carbon::now()->addSecond());
-                                cache(['caption' => null], Carbon::now()->addSecond());
-
-                                $telegram->sendMessage([
-                                    'chat_id' => $CHAT_ID,
-                                    'text' => 'Message rejected!'
-                                ]);
+                                $this->clear();
+                                $this->msg('Message rejected!');
 
                                 break;
                         }
-
-
                         break;
                 }
-
-
-                break;
+            }
         }
-
     }
 }
