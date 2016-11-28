@@ -36,7 +36,7 @@ class telegram extends Controller
         $msg = array_pop($response);
         $telegram->sendMessage([
             'chat_id' => $CHAT_ID,
-            'text' => print_r($msg);
+            'text' => print_r($msg, 1)
         ]);
 
         $photo = $msg->getMessage()->getPhoto();
