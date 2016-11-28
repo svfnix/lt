@@ -84,7 +84,7 @@ class telegram extends Controller
         if($message->has('photo')){
 
             $photo = $message->getPhoto();
-            $this->msg('flag');
+            $this->msg($photo[count($photo)-1]['file_id']);
             $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
             $this->msg('Please send caption:');
