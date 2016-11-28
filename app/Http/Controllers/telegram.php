@@ -34,6 +34,9 @@ class telegram extends Controller
             'chat_id' => $CHAT_ID,
             'text' => print_r($response, 1)
         ]);
+
+        return true;
+
         /**
          * @var Update $msg
          */
