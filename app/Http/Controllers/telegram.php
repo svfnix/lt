@@ -81,9 +81,6 @@ class telegram extends Controller
         $response = $this->telegram->getWebhookUpdates();
         $message = $response->getMessage();
 
-        $this->msg($message));
-        die();
-
         if($message->has('photo')){
 
             $photo = $message->getPhoto();
