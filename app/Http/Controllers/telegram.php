@@ -143,7 +143,7 @@ class telegram extends Controller
                             $this->telegram->$func([
                                 'chat_id' => $this->chatid,
                                 $this->type => $this->file,
-                                'caption' => $caption
+                                'caption' => $this->getCaption()
                             ]);
 
                             $this->msg('Message sent successfully.');
