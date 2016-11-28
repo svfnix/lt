@@ -34,7 +34,7 @@ class telegram extends Controller
         $message = $response->getMessage();
         $telegram->sendMessage([
             'chat_id' => $CHAT_ID,
-            'text' => print_r($message, 1)
+            'text' => $message->has('document')
         ]);
         die('ok');
 
