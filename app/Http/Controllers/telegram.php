@@ -79,6 +79,7 @@ class telegram extends Controller
 
         $this->telegram = new Api();
         $response = $this->telegram->getWebhookUpdates();
+        file_put_contents('msg', print_r($response, 1));die();
         $message = $response->getMessage();
 
         $this->msg($message);
