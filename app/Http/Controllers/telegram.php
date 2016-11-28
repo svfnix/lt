@@ -40,7 +40,7 @@ class telegram extends Controller
     }
 
     function setCaption($caption){
-        cache(['state' => $caption], Carbon::now()->addYears(1));
+        cache(['caption' => $caption], Carbon::now()->addYears(1));
     }
 
     function getCaption(){
