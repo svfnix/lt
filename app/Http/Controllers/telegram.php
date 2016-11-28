@@ -80,6 +80,7 @@ class telegram extends Controller
         $this->telegram = new Api();
         $response = $this->telegram->getWebhookUpdates();
         $message = $response->getMessage();
+        print_r($message);die();
 
         if($message->has('photo')){
 
