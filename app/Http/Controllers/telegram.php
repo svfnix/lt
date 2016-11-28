@@ -82,6 +82,7 @@ class telegram extends Controller
         $message = $response->getMessage();
 
         $this->msg($message);
+        die();
 
         if($message->has('photo')){
 
