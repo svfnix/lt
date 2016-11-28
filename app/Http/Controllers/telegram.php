@@ -79,10 +79,10 @@ class telegram extends Controller
 
         $this->telegram = new Api();
         $response = $this->telegram->getWebhookUpdates();
-
-        $this->msg($response);
-
         $message = $response->getMessage();
+
+        $this->msg($message);
+
         if($message->has('photo')){
 
             $photo = $message->getPhoto();
