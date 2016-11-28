@@ -44,11 +44,22 @@ class telegram extends Controller
 
         $type = $msg->getMessage()->getPhoto();
         if($type){
+            
             $type = 'photo';
+            
+            $photo = (array)$msg->getMessage()->getPhoto();
+            $photo = array_pop($photo);
+            $photo = array_pop($photo);
+            $file = $telegram->getFile(['file_id' => $photo['file_id']])->getFilePath();
+            
         } else {
+            
             $type = $msg->getMessage()->getDocument()->getMimeType();
             switch ($type){
-                case 'video/mp4': $type = 'video'; break;
+                case 'video/mp4':
+                    $type = 'video';
+                    $file = $telegram->getFile(['file_id' => $msg->getMessage()->getDocument()->getFileId()])->getFilePath();
+                    break;
             }
         }
 
@@ -57,20 +68,7 @@ class telegram extends Controller
             case 'video':
             case 'voice':
             case 'document':
-
-                if($type == 'photo'){
-
-                    $photo = (array)$msg->getMessage()->getPhoto();
-                    $photo = array_pop($photo);
-                    $photo = array_pop($photo);
-
-                    $file = $telegram->getFile(['file_id' => $photo['file_id']])->getFilePath();
-                } else{
-
-                    $func = 'get' . ucfirst($type);
-                    $file = $telegram->getFile(['file_id' => $msg->getMessage()->$func()->getFileId()])->getFilePath();
-                }
-
+                
                 $file = $this->file_url($file);
 
                 cache(['state' => 'STATE_SEND_CAPTION'], Carbon::now()->addMinutes(10));
