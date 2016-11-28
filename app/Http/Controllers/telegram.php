@@ -38,10 +38,10 @@ class telegram extends Controller
 
 
 
-        $type = $msg->getMessage()->getPhoto();
+        $message = $msg->getMessage();
         $telegram->sendMessage([
             'chat_id' => $CHAT_ID,
-            'text' => $type
+            'text' => print_r($message, 1)
         ]);
         die('ok');
 
