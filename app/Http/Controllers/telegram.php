@@ -51,7 +51,7 @@ class telegram extends Controller
 
     function msg($message){
         if(is_array($message)){
-            $message = print_r($message);
+            $message = print_r($message, 1);
         }
         $this->telegram->sendMessage([
             'chat_id' => $this->chatid,
