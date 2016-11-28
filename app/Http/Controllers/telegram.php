@@ -164,7 +164,11 @@ class telegram extends Controller
                     break;
 
                 default:
-                    $this->msg($message->getText());
+                    if($message->has('text')) {
+                        $this->msg($message->getText());
+                    } else {
+                        $this->msg('unknown message');
+                    }
                     break;
             }
         }
