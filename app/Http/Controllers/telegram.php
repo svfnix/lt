@@ -55,7 +55,7 @@ class telegram extends Controller
         }
         $this->telegram->sendMessage([
             'chat_id' => $this->chatid,
-            'text' => print_r($message)
+            'text' => $message
         ]);
     }
 
