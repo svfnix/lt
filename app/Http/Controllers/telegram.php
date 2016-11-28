@@ -30,14 +30,14 @@ class telegram extends Controller
 
         $telegram = new Api();
         $response = $telegram->getWebhookUpdates();
+        $telegram->sendMessage([
+            'chat_id' => $CHAT_ID,
+            'text' => print_r($response, 1)
+        ]);
         /**
          * @var Update $msg
          */
         $msg = array_pop($response);
-        $telegram->sendMessage([
-            'chat_id' => $CHAT_ID,
-            'text' => print_r($msg, 1)
-        ]);
 
         $photo = $msg->getMessage()->getPhoto();
         if($photo){
