@@ -30,6 +30,7 @@ class telegram extends Controller
     }
 
     function saveRequest($type, $file){
+        $this->msg($file);
         cache(['type' => $type], Carbon::now()->addYears(1));
         cache(['file' => $file], Carbon::now()->addYears(1));
     }
@@ -82,7 +83,6 @@ class telegram extends Controller
         if($message->has('photo')){
 
             $photo = $message->getPhoto();
-            $this->msg($photo[count($photo)-1]['file_id']);
             $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
             $this->msg('Please send caption:');
