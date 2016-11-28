@@ -30,8 +30,8 @@ class telegram extends Controller
     }
 
     function saveRequest($type, $file){
-        $this->msg($file);
         cache(['type' => $type], Carbon::now()->addYears(1));
+        $this->msg($file);
         cache(['file' => $file], Carbon::now()->addYears(1));
     }
 
