@@ -34,6 +34,10 @@ class telegram extends Controller
          * @var Update $msg
          */
         $msg = array_pop($response);
+        $telegram->sendMessage([
+            'chat_id' => $CHAT_ID,
+            'text' => print_r($msg);
+        ]);
 
         $photo = $msg->getMessage()->getPhoto();
         if($photo){
