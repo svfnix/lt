@@ -94,6 +94,20 @@ class telegram extends Controller
             $this->msg('Please send caption:');
             $this->setState('STATE_SEND_CAPTION');
 
+        }  elseif($message->has('document')) {
+
+            $document = $message->getDocument();
+            switch ($document->getMimeType()){
+                case 'video/mp4':
+
+                    $this->saveRequest('video', $document->getFileId());
+                    $this->msg('Please send caption:');
+                    $this->setState('STATE_SEND_CAPTION');
+
+                    break;
+            }
+
+
         } else {
 
             $this->loadRequest();
