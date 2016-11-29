@@ -7,6 +7,9 @@ use Telegram\Bot\Api;
 
 class telegram extends Controller
 {
+    /**
+     * @var Api()
+     */
     private $telegram;
     private $type;
     private $file;
@@ -58,7 +61,8 @@ class telegram extends Controller
     }
 
     function getFileUrl($file){
-        return 'https://api.telegram.org/file/bot'.config('telegram.bot_token').'/'.$file;
+        $file  = $this->telegram->getFile(['file_id' => $file]);
+        return 'https://api.telegram.org/file/bot'.config('telegram.bot_token').'/'.$file->getFilePath();
     }
 
     function generateCaption($message){
