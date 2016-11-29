@@ -13,10 +13,7 @@ class debug extends Command
     public function handle()
     {
         $telegram = new Api();
-        $response = $telegram->getUpdates([
-            'offset' => '1',
-            'limit'=>1]
-        );
+        $response = $telegram->getUpdates();
 
         print_r($response);
     }
