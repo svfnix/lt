@@ -81,6 +81,7 @@ class telegram extends Controller
 
         if($message->has('photo')){
 
+            $this->clear();
             $photo = $message->getPhoto();
             $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
@@ -89,6 +90,7 @@ class telegram extends Controller
 
         } elseif($message->has('video')) {
 
+            $this->clear();
             $this->saveRequest('video', $message->getVideo()->getFileId());
 
             $this->msg('Please send caption:');
@@ -96,6 +98,7 @@ class telegram extends Controller
 
         }  elseif($message->has('document')) {
 
+            $this->clear();
             $document = $message->getDocument();
             switch ($document->getMimeType()){
                 case 'video/mp4':
