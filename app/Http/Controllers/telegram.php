@@ -107,7 +107,6 @@ class telegram extends Controller
                     break;
             }
 
-
         } else {
 
             $this->loadRequest();
