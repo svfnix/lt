@@ -137,7 +137,7 @@ class telegram extends Controller
 
                             $func = 'send' . ucfirst($this->type);
                             $this->telegram->$func([
-                                'chat_id' => $this->chatid,
+                                'chat_id' => $this->channel,
                                 $this->type => $this->file,
                                 'caption' => $this->getCaption()
                             ]);
