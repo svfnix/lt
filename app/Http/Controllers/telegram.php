@@ -155,12 +155,23 @@ class telegram extends Controller
                     switch ($text){
                         case $msg_accept:
 
-                            $func = 'send' . ucfirst($this->type);
-                            $this->telegram->$func([
-                                'chat_id' => $this->channel,
-                                $this->type => $this->file,
-                                'caption' => $this->getCaption()
-                            ]);
+                            if($this->type == 'text'){
+
+                                $this->telegram->sendMessage([
+                                    'chat_id' => $this->channel,
+                                    'text' => $this->getCaption()
+                                ]);
+
+                            }else {
+
+                                $func = 'send' . ucfirst($this->type);
+                                $this->telegram->$func([
+                                    'chat_id' => $this->channel,
+                                    $this->type => $this->file,
+                                    'caption' => $this->getCaption()
+                                ]);
+
+                            }
 
                             $this->msg('Message sent successfully.');
                             $this->clear();
@@ -185,7 +196,15 @@ class telegram extends Controller
 
                 default:
                     if($message->has('text')) {
-                        $this->msg($message->getText());
+
+                        $this->clear();
+                        $this->saveRequest('text', null);
+                        $caption = $this->generateCaption($message->getText());
+                        $this->setCaption($caption);
+                        $this->msg($caption);
+                        $this->msg('Are you sure want to send this message to channel?');
+                        $this->setState('STATE_GET_CONFIRM');
+
                     } else {
                         $this->msg('unknown message');
                     }
