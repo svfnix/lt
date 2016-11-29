@@ -103,7 +103,7 @@ class telegram extends Controller
             switch ($document->getMimeType()){
                 case 'video/mp4':
 
-                    $this->saveRequest('video', $document->getFileId());
+                    $this->saveRequest('video', $this->getFileUrl($document->getFileName()));
                     $this->msg('Please send caption:');
                     $this->setState('STATE_SEND_CAPTION');
 
