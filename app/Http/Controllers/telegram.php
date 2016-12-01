@@ -54,10 +54,14 @@ class telegram extends Controller
         if(is_array($message)){
             $message = print_r($message, 1);
         }
-        $this->telegram->sendMessage([
-            'chat_id' => $this->chatid,
-            'text' => $message
-        ]);
+
+        $chats = explode(',', $this->chatid);
+        foreach ($chats as $chat) {
+            $this->telegram->sendMessage([
+                'chat_id' => $chat,
+                'text' => $message
+            ]);
+        }
     }
 
     function getFileUrl($file){
@@ -137,12 +141,16 @@ class telegram extends Controller
                     $this->setCaption($caption);
 
                     $func = 'send' . ucfirst($this->type);
-                    $this->telegram->$func([
-                        'chat_id' => $this->chatid,
-                        $this->type => $this->file,
-                        'caption' => $caption,
-                        'reply_markup' => $reply_markup
-                    ]);
+
+                    $chats = explode(',', $this->chatid);
+                    foreach ($chats as $chat) {
+                        $this->telegram->$func([
+                            'chat_id' => $chat,
+                            $this->type => $this->file,
+                            'caption' => $caption,
+                            'reply_markup' => $reply_markup
+                        ]);
+                    }
 
                     $this->msg('Are you sure want to send this message to channel?');
                     $this->setState('STATE_GET_CONFIRM');
