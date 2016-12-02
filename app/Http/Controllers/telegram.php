@@ -93,6 +93,7 @@ class telegram extends Controller
             $photo = $message->getPhoto();
             $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
+            $this->msg($message->getCaption());
             $this->msg('Please send caption:');
             $this->setState('STATE_SEND_CAPTION');
 
@@ -101,6 +102,7 @@ class telegram extends Controller
             $this->clear();
             $this->saveRequest('video', $message->getVideo()->getFileId());
 
+            $this->msg($message->getCaption());
             $this->msg('Please send caption:');
             $this->setState('STATE_SEND_CAPTION');
 
@@ -112,6 +114,7 @@ class telegram extends Controller
                 case 'video/mp4':
 
                     $this->saveRequest('video', $this->getFileUrl($document->getFileId()));
+                    $this->msg($message->getCaption());
                     $this->msg('Please send caption:');
                     $this->setState('STATE_SEND_CAPTION');
 
