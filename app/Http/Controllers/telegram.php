@@ -84,6 +84,10 @@ class telegram extends Controller
         return implode("\n\n", [trim($text), '💟 @telegfa']);
     }
 
+    function addSignature($message){
+        return implode("\n\n", [trim($message), '💟 @telegfa']);
+    }
+
     public function handle()
     {
         $this->chatid = env('TELEGRAM_CHAT_ID');
@@ -113,19 +117,18 @@ class telegram extends Controller
 
             $this->clear();
             $photo = $message->getPhoto();
-            $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
+            $photo = $photo[count($photo)-1]['file_id'];
+            $this->saveRequest('photo', $photo);
 
-            $caption = $this->clrMsg($message->getCaption());
+            $caption = $this->generateCaption($message);
             $this->setCaption($caption);
-
-            $caption = $this->generateCaption($caption);
 
             $chats = explode(',', $this->chatid);
             foreach ($chats as $chat) {
                 $this->telegram->sendPhoto([
                     'chat_id' => $chat,
-                    'photo' => $photo[count($photo)-1]['file_id'],
-                    'caption' => $caption,
+                    'photo' => $photo,
+                    'caption' => $this->addSignature($caption),
                     'reply_markup' => $reply_markup
                 ]);
             }
@@ -138,17 +141,15 @@ class telegram extends Controller
             $this->clear();
             $this->saveRequest('video', $message->getVideo()->getFileId());
 
-            $caption = $this->clrMsg($message->getCaption());
+            $caption = $this->generateCaption($message);
             $this->setCaption($caption);
-
-            $caption = $this->generateCaption($caption);
 
             $chats = explode(',', $this->chatid);
             foreach ($chats as $chat) {
                 $this->telegram->sendVideo([
                     'chat_id' => $chat,
                     'video' => $message->getVideo()->getFileId(),
-                    'caption' => $caption,
+                    'caption' => $this->addSignature($caption),
                     'reply_markup' => $reply_markup
                 ]);
             }
@@ -165,17 +166,15 @@ class telegram extends Controller
 
                     $this->saveRequest('video', $this->getFileUrl($document->getFileId()));
 
-                    $caption = $this->clrMsg($message->getCaption());
+                    $caption = $this->generateCaption($message);
                     $this->setCaption($caption);
-
-                    $caption = $this->generateCaption($caption);
 
                     $chats = explode(',', $this->chatid);
                     foreach ($chats as $chat) {
                         $this->telegram->sendVideo([
                             'chat_id' => $chat,
                             'video' => $this->getFileUrl($document->getFileId()),
-                            'caption' => $caption,
+                            'caption' => $this->addSignature($caption),
                             'reply_markup' => $reply_markup
                         ]);
                     }
@@ -215,7 +214,7 @@ class telegram extends Controller
                         $this->telegram->$func([
                             'chat_id' => $chat,
                             $this->type => $this->file,
-                            'caption' => $caption,
+                            'caption' => $this->addSignature($caption),
                             'reply_markup' => $reply_markup
                         ]);
                     }
@@ -235,7 +234,7 @@ class telegram extends Controller
 
                                 $this->telegram->sendMessage([
                                     'chat_id' => $this->channel,
-                                    'text' => $this->getCaption()
+                                    'text' => $this->addSignature($this->getCaption()),
                                 ]);
 
                             }else {
@@ -244,7 +243,7 @@ class telegram extends Controller
                                 $this->telegram->$func([
                                     'chat_id' => $this->channel,
                                     $this->type => $this->file,
-                                    'caption' => $this->getCaption()
+                                    'caption' => $this->addSignature($this->getCaption()),
                                 ]);
 
                             }
@@ -275,7 +274,7 @@ class telegram extends Controller
 
                         $this->clear();
                         $this->saveRequest('text', null);
-                        $caption = $this->generateCaption($message->getText());
+                        $caption = $this->generateCaption($message);
                         $this->setCaption($caption);
                         $this->msg($caption);
                         $this->msg('Are you sure want to send this message to channel?');
