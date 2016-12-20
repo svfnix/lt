@@ -74,6 +74,19 @@ class telegram extends Controller
         return implode("\n\n", [$text, '💟 @telegfa']);
     }
 
+    function clrMsg($msg){
+        $words = [
+            '@Campe85',
+            '@Tamasha_channel'
+        ];
+
+        foreach ($words as $word) {
+            $msg = str_ireplace($word, '', $msg);
+        }
+
+        return trim($msg);
+    }
+
     public function handle()
     {
         $this->chatid = env('TELEGRAM_CHAT_ID');
@@ -87,24 +100,64 @@ class telegram extends Controller
         $response = $this->telegram->getWebhookUpdates();
         $message = $response->getMessage();
 
+        $keyboard = [
+            [$msg_accept],
+            [$msg_edit],
+            [$msg_reject]
+        ];
+
+        $reply_markup = $this->telegram->replyKeyboardMarkup([
+            'keyboard' => $keyboard,
+            'resize_keyboard' => true,
+            'one_time_keyboard' => true
+        ]);
+
         if($message->has('photo')){
 
             $this->clear();
             $photo = $message->getPhoto();
             $this->saveRequest('photo', $photo[count($photo)-1]['file_id']);
 
-            $this->msg($message->getCaption());
-            $this->msg('Please send caption:');
-            $this->setState('STATE_SEND_CAPTION');
+            $caption = $this->clrMsg($message->getCaption());
+            $this->setCaption($caption);
+
+            $caption = $this->generateCaption($caption);
+
+            $chats = explode(',', $this->chatid);
+            foreach ($chats as $chat) {
+                $this->telegram->sendPhoto([
+                    'chat_id' => $chat,
+                    'photo' => $photo[count($photo)-1]['file_id'],
+                    'caption' => $caption,
+                    'reply_markup' => $reply_markup
+                ]);
+            }
+
+            $this->msg('Are you sure want to send this message to channel?');
+            $this->setState('STATE_GET_CONFIRM');
 
         } elseif($message->has('video')) {
 
             $this->clear();
             $this->saveRequest('video', $message->getVideo()->getFileId());
 
-            $this->msg($message->getCaption());
-            $this->msg('Please send caption:');
-            $this->setState('STATE_SEND_CAPTION');
+            $caption = $this->clrMsg($message->getCaption());
+            $this->setCaption($caption);
+
+            $caption = $this->generateCaption($caption);
+
+            $chats = explode(',', $this->chatid);
+            foreach ($chats as $chat) {
+                $this->telegram->sendVideo([
+                    'chat_id' => $chat,
+                    'video' => $message->getVideo()->getFileId(),
+                    'caption' => $caption,
+                    'reply_markup' => $reply_markup
+                ]);
+            }
+
+            $this->msg('Are you sure want to send this message to channel?');
+            $this->setState('STATE_GET_CONFIRM');
 
         }  elseif($message->has('document')) {
 
@@ -114,9 +167,24 @@ class telegram extends Controller
                 case 'video/mp4':
 
                     $this->saveRequest('video', $this->getFileUrl($document->getFileId()));
-                    $this->msg($message->getCaption());
-                    $this->msg('Please send caption:');
-                    $this->setState('STATE_SEND_CAPTION');
+
+                    $caption = $this->clrMsg($message->getCaption());
+                    $this->setCaption($caption);
+
+                    $caption = $this->generateCaption($caption);
+
+                    $chats = explode(',', $this->chatid);
+                    foreach ($chats as $chat) {
+                        $this->telegram->sendVideo([
+                            'chat_id' => $chat,
+                            'video' => , $this->getFileUrl($document->getFileId()),
+                            'caption' => $caption,
+                            'reply_markup' => $reply_markup
+                        ]);
+                    }
+
+                    $this->msg('Are you sure want to send this message to channel?');
+                    $this->setState('STATE_GET_CONFIRM');
 
                     break;
             }
