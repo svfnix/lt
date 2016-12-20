@@ -177,7 +177,7 @@ class telegram extends Controller
                     foreach ($chats as $chat) {
                         $this->telegram->sendVideo([
                             'chat_id' => $chat,
-                            'video' => , $this->getFileUrl($document->getFileId()),
+                            'video' => $this->getFileUrl($document->getFileId()),
                             'caption' => $caption,
                             'reply_markup' => $reply_markup
                         ]);
