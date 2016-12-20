@@ -285,7 +285,7 @@ class telegram extends Controller
                         $this->saveRequest('text', null);
                         $caption = $this->getTextFromMessage($message);
                         $this->setCaption($caption);
-                        $this->msg($caption);
+                        $this->msg($this->addSignature($caption));
                         $this->msg('Are you sure want to send this message to channel?');
                         $this->setState('STATE_GET_CONFIRM');
 
