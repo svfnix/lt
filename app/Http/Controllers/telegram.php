@@ -69,19 +69,28 @@ class telegram extends Controller
         return 'https://api.telegram.org/file/bot'.config('telegram.bot_token').'/'.$file->getFilePath();
     }
 
-    function generateCaption($message){
+    function clrStr($str){
 
         $words = [
             '@Campe85',
             '@Tamasha_channel'
         ];
 
-        $text = $message->has('text') ? $message->getText() : '';
         foreach ($words as $word) {
-            $text = str_ireplace($word, '', $text);
+            $str = str_ireplace($word, '', $str);
         }
 
-        return implode("\n\n", [trim($text), '💟 @telegfa']);
+        return $str;
+    }
+
+    function getCaptionFromMessage($message){
+        $caption = $message->has('caption') ? $message->getCaption() : '';
+        return $this->clrStr($caption);
+    }
+
+    function getTextFromMessage($message){
+        $text = $message->has('text') ? $message->getText() : '';
+        return $this->clrStr($text);
     }
 
     function addSignature($message){
@@ -120,7 +129,7 @@ class telegram extends Controller
             $photo = $photo[count($photo)-1]['file_id'];
             $this->saveRequest('photo', $photo);
 
-            $caption = $this->generateCaption($message);
+            $caption = $this->getCaptionFromMessage($message);
             $this->setCaption($caption);
 
             $chats = explode(',', $this->chatid);
@@ -141,7 +150,7 @@ class telegram extends Controller
             $this->clear();
             $this->saveRequest('video', $message->getVideo()->getFileId());
 
-            $caption = $this->generateCaption($message);
+            $caption = $this->getCaptionFromMessage($message);
             $this->setCaption($caption);
 
             $chats = explode(',', $this->chatid);
@@ -166,7 +175,7 @@ class telegram extends Controller
 
                     $this->saveRequest('video', $this->getFileUrl($document->getFileId()));
 
-                    $caption = $this->generateCaption($message);
+                    $caption = $this->getCaptionFromMessage($message);
                     $this->setCaption($caption);
 
                     $chats = explode(',', $this->chatid);
@@ -204,7 +213,7 @@ class telegram extends Controller
                         'one_time_keyboard' => true
                     ]);
 
-                    $caption = $this->generateCaption($message);
+                    $caption = $this->getTextFromMessage($message);
                     $this->setCaption($caption);
 
                     $func = 'send' . ucfirst($this->type);
@@ -274,7 +283,7 @@ class telegram extends Controller
 
                         $this->clear();
                         $this->saveRequest('text', null);
-                        $caption = $this->generateCaption($message);
+                        $caption = $this->getTextFromMessage($message);
                         $this->setCaption($caption);
                         $this->msg($caption);
                         $this->msg('Are you sure want to send this message to channel?');
