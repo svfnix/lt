@@ -70,21 +70,18 @@ class telegram extends Controller
     }
 
     function generateCaption($message){
-        $text = $message->has('text') ? $message->getText() : '';
-        return implode("\n\n", [$text, '💟 @telegfa']);
-    }
 
-    function clrMsg($msg){
         $words = [
             '@Campe85',
             '@Tamasha_channel'
         ];
 
+        $text = $message->has('text') ? $message->getText() : '';
         foreach ($words as $word) {
-            $msg = str_ireplace($word, '', $msg);
+            $text = str_ireplace($word, '', $text);
         }
 
-        return trim($msg);
+        return implode("\n\n", [trim($text), '💟 @telegfa']);
     }
 
     public function handle()
