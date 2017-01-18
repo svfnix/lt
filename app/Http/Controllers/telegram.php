@@ -244,6 +244,7 @@ class telegram extends Controller
                                 $this->telegram->sendMessage([
                                     'chat_id' => $this->channel,
                                     'text' => $this->addSignature($this->getCaption()),
+                                    'disable_notification' => true
                                 ]);
 
                             }else {
@@ -253,6 +254,7 @@ class telegram extends Controller
                                     'chat_id' => $this->channel,
                                     $this->type => $this->file,
                                     'caption' => $this->addSignature($this->getCaption()),
+                                    'disable_notification' => true
                                 ]);
 
                             }
